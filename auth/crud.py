@@ -2,6 +2,7 @@ from database import SessionLocal
 from auth.models import User
 from auth import schemas, utils, models
 from fastapi import HTTPException
+from sqlalchemy import or_
 
 def create_user(db: SessionLocal, user: schemas.CreateUser):
     user = models.User(firstName=user.first_name, lastName=user.last_name, username=user.username, email=user.email, password=utils.get_password_hash(user.password))
@@ -11,7 +12,7 @@ def create_user(db: SessionLocal, user: schemas.CreateUser):
     return user
 
 def check_existance(db: SessionLocal, user: schemas.CreateUser):
-    user = db.query(User).filter(User.email == user.email or User.username == user.username).first()
+    user = db.query(User).filter(or_(User.email == user.email, User.username == user.username)).first()
     msg = True if user else False
     return msg
 

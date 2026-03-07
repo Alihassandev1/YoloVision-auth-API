@@ -38,15 +38,19 @@ async def authenticate_user(user: schemas.LoginUser, db: Session = Depends(get_d
     return utils.user_authentication(user, db)
 
 @router.get("/me", response_model=schemas.UserResponse)
+
 async def my_profile(user: schemas.UserResponse = Depends(utils.current_user)):
     return user
 
 @router.post("/me/update-password")
-async def update_your_password(old_password: str, new_password: str, user: schemas.UserResponse = Depends(utils.current_user)):
+async def update_your_password(old_password: str, new_password: str, user: schemas.UserResponse = Depends(utils.current_user), db: Session = Depends(get_db)):
     register_password = user.password
     if not utils.verify_password(old_password, register_password):
         raise HTTPException(status_code=404, detail="Invalid Password")
-    user.password = utils.get_password_hash(new_password)
+    new_password_hash = utils.get_password_hash(new_password)
+    db.query(User).filter(User.id == user.id).update({User.password: new_password_hash})
+    db.commit()
+    db.refresh(user)
     return "Congratulations! Password Changed Successfully"
 
 @router.post("/superuser", response_model=schemas.UserResponse)
