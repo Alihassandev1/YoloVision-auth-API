@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from trt import detect, segment, classify, pose
+from yolomodels.utils import detect, segment, classify, pose
 from auth.utils import current_user
 from auth.models import UserHistory
 from admin.routes import get_db
